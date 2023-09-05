@@ -6,7 +6,7 @@ layout (location=2) in vec3 vertexNormal;
 
 out vec3 outPosition;
 out vec2 outTextureCoords;
-out vec3 outVertexNormals;
+out vec3 outVertexNormal;
 
 uniform mat4 projectionMatrix;
 uniform mat4 modelViewMatrix;
@@ -18,5 +18,5 @@ void main()
 
     outPosition = worldPosition.xyz;
     outTextureCoords = textureCoords;
-    outVertexNormals = normalize(modelViewMatrix * vec4(vertexNormal, 0)).xyz;
+    outVertexNormal = normalize(modelViewMatrix * vec4(vertexNormal, 0)).xyz;
 }

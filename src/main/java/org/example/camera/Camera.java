@@ -49,4 +49,8 @@ public class Camera {
                 .translate(-position.x, -position.y, -position.z);
         return new Matrix4f(viewMatrix);
     }
+
+    public Vector3f getPosition() {
+        return position;
+    }
 }

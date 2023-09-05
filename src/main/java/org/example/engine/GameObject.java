@@ -25,9 +25,8 @@ public class GameObject {
         mesh.render();
     }
 
-    public void setShaderColor(ShaderProgram shaderProgram) {
-        shaderProgram.setUniform("color", mesh.getColor());
-        shaderProgram.setUniform("useColor", mesh.hasTexture() ? 0 : 1);
+    public void setShaderMaterial(ShaderProgram shaderProgram) {
+        shaderProgram.setUniform("material", mesh.getMaterial());
     }
 
     public Matrix4f getModelViewMatrix(Matrix4f viewMatrix) {

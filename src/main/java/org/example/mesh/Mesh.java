@@ -1,5 +1,6 @@
 package org.example.mesh;
 
+import org.example.material.Material;
 import org.example.texture.Texture;
 import org.joml.Vector3f;
 import org.lwjgl.system.MemoryUtil;
@@ -23,7 +24,10 @@ public class Mesh {
     private Vector3f color = new Vector3f(1.0f, 1.0f, 1.0f);
     private boolean isWireframe;
 
-    public Mesh(float[] vertices, int[] indices, float[] textureCoords, float[] normals) {
+    private Material material;
+
+    public Mesh(float[] vertices, int[] indices, float[] textureCoords, float[] normals, Material material) {
+        this.material = material;
         vertexCount = indices.length;
 
         vaoId = glGenVertexArrays();
@@ -117,9 +121,14 @@ public class Mesh {
 
     public void setTexture(Texture texture) {
         this.texture = texture;
+        this.material.setHasTexture(hasTexture());
     }
 
     public void setWireframe(boolean wireframe) {
         isWireframe = wireframe;
+    }
+
+    public Material getMaterial() {
+        return material;
     }
 }

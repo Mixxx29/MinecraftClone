@@ -2,11 +2,13 @@ package org.example.mesh;
 
 import org.example.camera.Camera;
 import org.example.engine.GameObject;
+import org.example.light.PointLight;
 import org.example.shader.ShaderProgram;
 import org.example.util.FileLoader;
 import org.example.util.Transformations;
 import org.example.window.Window;
 import org.joml.Matrix4f;
+import org.joml.Vector3f;
 
 public class Renderer {
     private static final float FOV = (float) Math.toRadians(60.0f);
@@ -26,14 +28,14 @@ public class Renderer {
 
         shaderProgram.createUniform("projectionMatrix");
         shaderProgram.createUniform("modelViewMatrix");
-
         shaderProgram.createUniform("textureSampler");
-
-        shaderProgram.createUniform("color");
-        shaderProgram.createUniform("useColor");
+        shaderProgram.createUniform("ambientColor");
+        shaderProgram.createUniform("specularPower");
+        shaderProgram.createPointLightUniform("pointLight");
+        shaderProgram.createMaterialUniform("material");
     }
 
-    public void render(GameObject[] gameObjects, Camera camera) {
+    public void render(GameObject[] gameObjects, Camera camera, PointLight pointLight) {
         shaderProgram.bind();
 
         Matrix4f projectionMatrix = Transformations.getProjectionMatrix(
@@ -43,17 +45,19 @@ public class Renderer {
                 Z_NEAR,
                 Z_FAR
         );
-        shaderProgram.setUniform("projectionMatrix", projectionMatrix);
-
         Matrix4f viewMatrix = camera.getViewMatrix();
 
+        shaderProgram.setUniform("projectionMatrix", projectionMatrix);
         shaderProgram.setUniform("textureSampler", 0);
+        shaderProgram.setUniform("ambientColor", new Vector3f(1.0f, 1.0f, 1.0f));
+        shaderProgram.setUniform("specularPower", 1.0f);
+        shaderProgram.setUniform("pointLight", pointLight, viewMatrix);
 
         for (GameObject gameObject : gameObjects) {
             Matrix4f modelViewMatrix = gameObject.getModelViewMatrix(viewMatrix);
             shaderProgram.setUniform("modelViewMatrix", modelViewMatrix);
 
-            gameObject.setShaderColor(shaderProgram);
+            gameObject.setShaderMaterial(shaderProgram);
 
             gameObject.render();
         }

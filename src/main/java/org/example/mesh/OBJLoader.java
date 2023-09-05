@@ -1,8 +1,10 @@
 package org.example.mesh;
 
+import org.example.material.Material;
 import org.example.util.FileLoader;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
+import org.joml.Vector4f;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -90,6 +92,10 @@ public class OBJLoader {
 
         int[] indexArray = indices.stream().mapToInt((Integer v) -> v).toArray();
 
-        return new Mesh(vertexArray, indexArray, textureArray, normalArray);
+        Material material = new Material(
+                new Vector4f(1.0f, 1.0f, 1.0f, 1.0f),
+                0.0f
+        );
+        return new Mesh(vertexArray, indexArray, textureArray, normalArray, material);
     }
 }

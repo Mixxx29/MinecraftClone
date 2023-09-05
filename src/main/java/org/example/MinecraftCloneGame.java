@@ -4,12 +4,17 @@ import org.example.camera.Camera;
 import org.example.engine.Game;
 import org.example.engine.GameObject;
 import org.example.input.MouseInput;
+import org.example.light.Attenuation;
+import org.example.light.PointLight;
+import org.example.material.Material;
 import org.example.mesh.Mesh;
 import org.example.mesh.OBJLoader;
 import org.example.mesh.Renderer;
 import org.example.texture.Texture;
 import org.example.window.Window;
 import org.joml.Vector2f;
+import org.joml.Vector2i;
+import org.joml.Vector3f;
 import org.joml.Vector3i;
 import org.lwjgl.glfw.GLFW;
 
@@ -21,8 +26,10 @@ public class MinecraftCloneGame implements Game {
     private final float speed = 1.0f;
     private final float rotationSpeed = 10.0f;
     private final Vector3i direction = new Vector3i(0, 0, 0);
+    private final Vector2i lightInputDirection = new Vector2i(0, 0);
     private Renderer renderer;
     private GameObject[] gameObjects;
+    private PointLight pointLight;
 
     public MinecraftCloneGame(String title) {
         this.title = title;
@@ -32,6 +39,13 @@ public class MinecraftCloneGame implements Game {
     public void init(Window window) {
         renderer = new Renderer(window);
         window.setBackground(Color.BLACK);
+
+        pointLight = new PointLight(
+                new Vector3f(0.5f, 0.5f, 0.0f),
+                new Vector3f(2.0f, 2.0f, 4.0f),
+                1.0f,
+                new Attenuation(1.0f, 0.01f, 0.0001f)
+        );
 
         float[] vertices = new float[]{
                 // Front face
@@ -123,9 +137,49 @@ public class MinecraftCloneGame implements Game {
 
         };
 
+        float[] normals = new float[]{
+                // Front face
+                0.0f, 0.0f, 1.0f,
+                0.0f, 0.0f, 1.0f,
+                0.0f, 0.0f, 1.0f,
+                0.0f, 0.0f, 1.0f,
+
+                // Back face
+                0.0f, 0.0f, -1.0f,
+                0.0f, 0.0f, -1.0f,
+                0.0f, 0.0f, -1.0f,
+                0.0f, 0.0f, -1.0f,
+
+                // Left face
+                -1.0f, 0.0f, 0.0f,
+                -1.0f, 0.0f, 0.0f,
+                -1.0f, 0.0f, 0.0f,
+                -1.0f, 0.0f, 0.0f,
+
+                // Right face
+                1.0f, 0.0f, 0.0f,
+                1.0f, 0.0f, 0.0f,
+                1.0f, 0.0f, 0.0f,
+                1.0f, 0.0f, 0.0f,
+
+                // Top face
+                0.0f, 1.0f, 0.0f,
+                0.0f, 1.0f, 0.0f,
+                0.0f, 1.0f, 0.0f,
+                0.0f, 1.0f, 0.0f,
+
+                // Bottom face
+                0.0f, -1.0f, 0.0f,
+                0.0f, -1.0f, 0.0f,
+                0.0f, -1.0f, 0.0f,
+                0.0f, -1.0f, 0.0f
+        };
+
+        Material material = new Material();
         Texture texture = new Texture("/textures/texture.png");
-        Mesh mesh = new Mesh(vertices, indices, textureCoords, null);
+        Mesh mesh = new Mesh(vertices, indices, textureCoords, normals, material);
         mesh.setTexture(texture);
+        //mesh.getMaterial().setLit(false);
 
         GameObject gameObject1 = new GameObject(mesh);
         gameObject1.setPosition(0, 0, -2.0f);
@@ -169,6 +223,7 @@ public class MinecraftCloneGame implements Game {
         direction.x = 0;
         direction.y = 0;
         direction.z = 0;
+        lightInputDirection.x = 0;
 
         if (window.isKeyPressed(GLFW.GLFW_KEY_W)) {
             direction.z = -1;
@@ -187,6 +242,12 @@ public class MinecraftCloneGame implements Game {
         } else if (window.isKeyPressed(GLFW.GLFW_KEY_LEFT_SHIFT)) {
             direction.y = -1;
         }
+
+        if (window.isKeyPressed(GLFW.GLFW_KEY_Q)) {
+            lightInputDirection.x = -1;
+        } else if (window.isKeyPressed(GLFW.GLFW_KEY_E)) {
+            lightInputDirection.x = 1;
+        }
     }
 
     @Override
@@ -202,12 +263,15 @@ public class MinecraftCloneGame implements Game {
                 rotationSpeed * deltaTime
         );
         mouseInput.rotateCamera(camera, deltaRotation);
+
+        Vector3f pos = pointLight.getPosition();
+        pos.x += lightInputDirection.x * speed * 5.0f * deltaTime;
     }
 
     @Override
     public void render(Window window) {
         window.clear();
-        renderer.render(gameObjects, camera);
+        renderer.render(gameObjects, camera, pointLight);
         window.render();
     }
 
