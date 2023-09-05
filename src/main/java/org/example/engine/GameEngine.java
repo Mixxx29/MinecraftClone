@@ -8,7 +8,7 @@ import static org.lwjgl.glfw.GLFW.glfwPollEvents;
 
 public class GameEngine implements Runnable {
     private final Thread gameThread;
-    private final BaseGame game;
+    private final Game game;
     private final Window window;
     private final MouseInput mouseInput;
     private int fps = 0;
@@ -16,10 +16,10 @@ public class GameEngine implements Runnable {
     private double elapsedTime = 0.0f;
     private double previousTime;
 
-    public GameEngine(String title, int width, int height, boolean vsync, BaseGame game) {
+    public GameEngine(int width, int height, boolean vsync, Game game) {
         this.game = game;
         this.gameThread = new Thread(this, "GAME_LOOP_THREAD");
-        this.window = new Window(title, width, height, vsync);
+        this.window = new Window(game.getTitle(), width, height, vsync);
         this.mouseInput = new MouseInput();
     }
 
@@ -29,26 +29,37 @@ public class GameEngine implements Runnable {
 
     @Override
     public void run() {
+        init();
+        startLoop();
+    }
+
+    private void init() {
         window.init();
         mouseInput.init(window);
         game.init(window);
+    }
+
+    private void startLoop() {
+        previousTime = glfwGetTime();
         loop();
-        window.close();
     }
 
     private void loop() {
-        previousTime = glfwGetTime();
-        while (!window.shouldClose()) {
-            calculateDeltaTime();
-            calculateFPS();
-
-            glfwPollEvents();
-            mouseInput.input(window);
-
-            game.input(window, mouseInput);
-            game.update(deltaTime, mouseInput);
-            game.render(window);
+        while (isRunning()) {
+            processTime();
+            processInput();
+            processGame();
         }
+        close();
+    }
+
+    private boolean isRunning() {
+        return !window.shouldClose();
+    }
+
+    private void processTime() {
+        calculateDeltaTime();
+        calculateFPS();
     }
 
     private void calculateDeltaTime() {
@@ -71,4 +82,18 @@ public class GameEngine implements Runnable {
         }
     }
 
+    private void processInput() {
+        glfwPollEvents(); // Process events
+        mouseInput.update();
+    }
+
+    private void processGame() {
+        game.input(window, mouseInput);
+        game.update(deltaTime, mouseInput);
+        game.render(window);
+    }
+
+    private void close() {
+        window.close();
+    }
 }

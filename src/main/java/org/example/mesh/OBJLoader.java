@@ -76,10 +76,9 @@ public class OBJLoader {
         float[] normalArray = new float[vertices.size() * 3];
 
         for (Face face : faces) {
-            Face.IndexGroup[] indexGroups = face.getIndexGroups();
-            for (Face.IndexGroup indexGroup : indexGroups) {
-                processIndexGroup(
-                        indexGroup,
+            Vertex[] vertexGroup = face.getVertices();
+            for (Vertex vertex : vertexGroup) {
+                vertex.process(
                         textures,
                         normals,
                         indices,
@@ -92,30 +91,5 @@ public class OBJLoader {
         int[] indexArray = indices.stream().mapToInt((Integer v) -> v).toArray();
 
         return new Mesh(vertexArray, indexArray, textureArray, normalArray);
-    }
-
-    private static void processIndexGroup(
-            Face.IndexGroup indexGroup,
-            List<Vector2f> textures,
-            List<Vector3f> normals,
-            List<Integer> indices,
-            float[] textureArray,
-            float[] normalArray
-    ) {
-        int index = indexGroup.indexPosition;
-        indices.add(index);
-
-        if (indexGroup.indexTexture != Face.IndexGroup.NO_VALUE) {
-            Vector2f texture = textures.get(indexGroup.indexTexture);
-            textureArray[index * 2] = texture.x;
-            textureArray[index * 2 + 1] = 1.0f - texture.y;
-        }
-
-        if (indexGroup.indexNormal != Face.IndexGroup.NO_VALUE) {
-            Vector3f normal = normals.get(indexGroup.indexNormal);
-            normalArray[index * 3] = normal.x;
-            normalArray[index * 3 + 1] = normal.y;
-            normalArray[index * 3 + 2] = normal.z;
-        }
     }
 }

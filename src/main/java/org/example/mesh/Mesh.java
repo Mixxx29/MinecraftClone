@@ -21,6 +21,7 @@ public class Mesh {
     private int normalVboId = -1;
     private int textureVboId;
     private Vector3f color = new Vector3f(1.0f, 1.0f, 1.0f);
+    private boolean isWireframe;
 
     public Mesh(float[] vertices, int[] indices, float[] textureCoords, float[] normals) {
         vertexCount = indices.length;
@@ -78,7 +79,9 @@ public class Mesh {
         glEnableVertexAttribArray(1);
         if (normalVboId != -1) glEnableVertexAttribArray(2);
 
+        if (isWireframe) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         glDrawElements(GL_TRIANGLES, vertexCount, GL_UNSIGNED_INT, 0);
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
         glDisableVertexAttribArray(0);
         glDisableVertexAttribArray(1);
@@ -114,5 +117,9 @@ public class Mesh {
 
     public void setTexture(Texture texture) {
         this.texture = texture;
+    }
+
+    public void setWireframe(boolean wireframe) {
+        isWireframe = wireframe;
     }
 }

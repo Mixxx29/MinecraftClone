@@ -1,55 +1,52 @@
 package org.example.camera;
 
-import org.joml.Vector3d;
+import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
 public class Camera {
-    private Vector3f position;
-    private Vector3f rotation;
+    private final Vector3f position;
+    private final Vector3f rotation;
+    private final Matrix4f viewMatrix;
 
     public Camera() {
         position = new Vector3f(0.0f, 0.0f, 0.0f);
         rotation = new Vector3f(0.0f, 0.0f, 0.0f);
+        viewMatrix = new Matrix4f();
     }
 
-    public Camera(Vector3f position, Vector3f rotation) {
-        this.position = position;
-        this.rotation = rotation;
+    public void move(float deltaX, float deltaY, float deltaZ) {
+        moveX(deltaX);
+        moveY(deltaY);
+        moveZ(deltaZ);
     }
 
-    public void move(Vector3d offset) {
-        if (offset.z != 0) {
-            position.x -= (float) Math.sin(Math.toRadians(rotation.y)) * offset.z;
-            position.z += (float) Math.cos(Math.toRadians(rotation.y)) * offset.z;
-        }
-
-        if (offset.x != 0) {
-            position.x -= (float) Math.sin(Math.toRadians(rotation.y - 90)) * offset.x;
-            position.z += (float) Math.cos(Math.toRadians(rotation.y - 90)) * offset.x;
-        }
-
-        position.y += offset.y;
+    private void moveX(double deltaX) {
+        if (deltaX == 0) return;
+        position.x -= (float) Math.sin(Math.toRadians(rotation.y - 90)) * deltaX;
+        position.z += (float) Math.cos(Math.toRadians(rotation.y - 90)) * deltaX;
     }
 
-    public void rotate(Vector3f offset) {
-        rotation.x += offset.x;
-        rotation.y += offset.y;
-        rotation.z += offset.z;
+    private void moveY(double deltaY) {
+        position.y += deltaY;
     }
 
-    public Vector3f getPosition() {
-        return position;
+    private void moveZ(double deltaZ) {
+        if (deltaZ == 0) return;
+        position.x -= (float) Math.sin(Math.toRadians(rotation.y)) * deltaZ;
+        position.z += (float) Math.cos(Math.toRadians(rotation.y)) * deltaZ;
     }
 
-    public void setPosition(Vector3f position) {
-        this.position = position;
+    public void rotate(float deltaX, float deltaY, float deltaZ) {
+        rotation.x = (rotation.x + deltaX + 360) % 360;
+        rotation.y = (rotation.y + deltaY + 360) % 360;
+        rotation.z = (rotation.z + deltaZ + 360) % 360;
     }
 
-    public Vector3f getRotation() {
-        return rotation;
-    }
-
-    public void setRotation(Vector3f rotation) {
-        this.rotation = rotation;
+    public Matrix4f getViewMatrix() {
+        viewMatrix.identity()
+                .rotate((float) Math.toRadians(rotation.x), new Vector3f(1.0f, 0.0f, 0.0f))
+                .rotate((float) Math.toRadians(rotation.y), new Vector3f(0.0f, 1.0f, 0.0f))
+                .translate(-position.x, -position.y, -position.z);
+        return new Matrix4f(viewMatrix);
     }
 }

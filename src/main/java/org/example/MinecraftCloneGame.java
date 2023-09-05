@@ -1,7 +1,7 @@
 package org.example;
 
 import org.example.camera.Camera;
-import org.example.engine.BaseGame;
+import org.example.engine.Game;
 import org.example.engine.GameObject;
 import org.example.input.MouseInput;
 import org.example.mesh.Mesh;
@@ -9,20 +9,24 @@ import org.example.mesh.OBJLoader;
 import org.example.mesh.Renderer;
 import org.example.texture.Texture;
 import org.example.window.Window;
-import org.joml.Vector3d;
-import org.joml.Vector3f;
+import org.joml.Vector2f;
 import org.joml.Vector3i;
 import org.lwjgl.glfw.GLFW;
 
 import java.awt.*;
 
-public class MinecraftCloneGame implements BaseGame {
+public class MinecraftCloneGame implements Game {
+    private final String title;
     private final Camera camera = new Camera();
     private final float speed = 1.0f;
-    private final float rotationSpeed = 100.0f;
+    private final float rotationSpeed = 10.0f;
     private final Vector3i direction = new Vector3i(0, 0, 0);
     private Renderer renderer;
     private GameObject[] gameObjects;
+
+    public MinecraftCloneGame(String title) {
+        this.title = title;
+    }
 
     @Override
     public void init(Window window) {
@@ -141,7 +145,7 @@ public class MinecraftCloneGame implements BaseGame {
 
         Mesh bunnyMesh = OBJLoader.loadMesh("models/bunny.obj");
         GameObject gameObject5 = new GameObject(bunnyMesh);
-        gameObject5.setPosition(0.5f, 0.75f, -2.0f);
+        gameObject5.setPosition(0.5f, 0.78f, -2.0f);
         gameObject5.setScale(0.1f, 0.1f, 0.1f);
 
         Texture planeTexture = new Texture("/textures/F16s.png");
@@ -157,7 +161,6 @@ public class MinecraftCloneGame implements BaseGame {
                 gameObject3,
                 gameObject4,
                 gameObject5,
-                gameObject6,
         };
     }
 
@@ -189,22 +192,16 @@ public class MinecraftCloneGame implements BaseGame {
     @Override
     public void update(float deltaTime, MouseInput mouseInput) {
         camera.move(
-                new Vector3d(
-                        direction.x * speed * deltaTime,
-                        direction.y * speed * deltaTime,
-                        direction.z * speed * deltaTime
-                )
+                direction.x * speed * deltaTime,
+                direction.y * speed * deltaTime,
+                direction.z * speed * deltaTime
         );
 
-        if (mouseInput.isRightButtonPressed() && mouseInput.getMoved().x != 0) {
-            camera.rotate(
-                    new Vector3f(
-                            mouseInput.getMoved().y * rotationSpeed * deltaTime,
-                            mouseInput.getMoved().x * rotationSpeed * deltaTime,
-                            0.0f
-                    )
-            );
-        }
+        Vector2f deltaRotation = new Vector2f(
+                rotationSpeed * deltaTime,
+                rotationSpeed * deltaTime
+        );
+        mouseInput.rotateCamera(camera, deltaRotation);
     }
 
     @Override
@@ -212,5 +209,10 @@ public class MinecraftCloneGame implements BaseGame {
         window.clear();
         renderer.render(gameObjects, camera);
         window.render();
+    }
+
+    @Override
+    public String getTitle() {
+        return title;
     }
 }

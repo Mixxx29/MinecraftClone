@@ -1,53 +1,61 @@
 package org.example.engine;
 
 import org.example.mesh.Mesh;
+import org.example.shader.ShaderProgram;
+import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
 public class GameObject {
-    private Mesh mesh;
-    private Vector3f position;
-    private Vector3f rotation;
-    private Vector3f scale;
+    private final Matrix4f modelViewMatrix;
+
+    private final Mesh mesh;
+    private final Vector3f position;
+    private final Vector3f rotation;
+    private final Vector3f scale;
 
     public GameObject(Mesh mesh) {
         this.mesh = mesh;
         this.position = new Vector3f(0.0f, 0.0f, 0.0f);
         this.rotation = new Vector3f(0.0f, 0.0f, 0.0f);
         this.scale = new Vector3f(0.5f, 0.5f, 0.5f);
+        this.modelViewMatrix = new Matrix4f();
     }
 
-    public Mesh getMesh() {
-        return mesh;
+    public void render() {
+        mesh.render();
     }
 
-    public Vector3f getPosition() {
-        return position;
+    public void setShaderColor(ShaderProgram shaderProgram) {
+        shaderProgram.setUniform("color", mesh.getColor());
+        shaderProgram.setUniform("useColor", mesh.hasTexture() ? 0 : 1);
     }
 
-    public void setPosition(Vector3f position) {
-        this.position = position;
+    public Matrix4f getModelViewMatrix(Matrix4f viewMatrix) {
+        calculateWorldMatrix();
+        Matrix4f viewCurrent = new Matrix4f(viewMatrix);
+        return viewCurrent.mul(modelViewMatrix);
+    }
+
+    private void calculateWorldMatrix() {
+        modelViewMatrix.identity()
+                .translate(position)
+                .rotateX((float) Math.toRadians(rotation.x))
+                .rotateY((float) Math.toRadians(rotation.y))
+                .rotateZ((float) Math.toRadians(rotation.z))
+                .scale(scale);
     }
 
     public void setPosition(float x, float y, float z) {
-        this.position.x = x;
-        this.position.y = y;
-        this.position.z = z;
+        position.x = x;
+        position.y = y;
+        position.z = z;
     }
 
-    public Vector3f getRotation() {
-        return rotation;
-    }
 
-    public void setRotation(Vector3f rotation) {
-        this.rotation = rotation;
-    }
-
-    public Vector3f getScale() {
-        return scale;
-    }
-
-    public void setScale(Vector3f scale) {
-        this.scale = scale;
+    public void setRotation(float x, float y, float z) {
+        this.rotation.x = x;
+        this.rotation.y = y;
+        this.rotation.z = z;
     }
 
     public void setScale(float x, float y, float z) {

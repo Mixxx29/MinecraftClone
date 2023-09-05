@@ -1,50 +1,33 @@
 package org.example.mesh;
 
 public class Face {
-    private IndexGroup[] indexGroups;
+    private final Vertex[] vertices;
 
-    public Face(String token1, String token2, String token3) {
-        indexGroups = new IndexGroup[3];
-        indexGroups[0] = parseToken(token1);
-        indexGroups[1] = parseToken(token2);
-        indexGroups[2] = parseToken(token3);
+    public Face(String... tokens) {
+        vertices = new Vertex[3];
+        vertices[0] = parseVertex(tokens[0]);
+        vertices[1] = parseVertex(tokens[1]);
+        vertices[2] = parseVertex(tokens[2]);
     }
 
-    private IndexGroup parseToken(String token) {
-        IndexGroup indexGroup = new IndexGroup();
-
+    private Vertex parseVertex(String token) {
         String[] tokenParts = token.split("/");
-        indexGroup.indexPosition = Integer.parseInt(tokenParts[0]) - 1;
+        int vertexIndex = Integer.parseInt(tokenParts[0]) - 1;
 
-        if (tokenParts.length > 1) {
-            String textureCoords = tokenParts[1];
-            if (textureCoords.length() > 0) {
-                indexGroup.indexTexture = Integer.parseInt(textureCoords) - 1;
-            }
+        int textureCoordsIndex = Vertex.NO_VALUE;
+        if (tokenParts.length > 1 && tokenParts[1].length() > 0) {
+            textureCoordsIndex = Integer.parseInt(tokenParts[0]) - 1;
         }
 
-        if (tokenParts.length > 2) {
-            indexGroup.indexNormal = Integer.parseInt(tokenParts[2]) - 1;
+        int normalIndex = Vertex.NO_VALUE;
+        if (tokenParts.length > 2 && tokenParts[2].length() > 0) {
+            normalIndex = Integer.parseInt(tokenParts[2]) - 1;
         }
 
-        return indexGroup;
+        return new Vertex(vertexIndex, textureCoordsIndex, normalIndex);
     }
 
-    public IndexGroup[] getIndexGroups() {
-        return indexGroups;
-    }
-
-    public static class IndexGroup {
-        public static final int NO_VALUE = -1;
-
-        public int indexPosition;
-        public int indexTexture;
-        public int indexNormal;
-
-        public IndexGroup() {
-            indexPosition = NO_VALUE;
-            indexTexture = NO_VALUE;
-            indexNormal = NO_VALUE;
-        }
+    public Vertex[] getVertices() {
+        return vertices;
     }
 }

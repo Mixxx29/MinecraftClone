@@ -20,8 +20,8 @@ public class Renderer {
 
         // Create shader program
         shaderProgram = new ShaderProgram();
-        shaderProgram.createVertexShader(FileLoader.loadContent("shaders/vertex.fs"));
-        shaderProgram.createFragmentShader(FileLoader.loadContent("shaders/fragment.fs"));
+        shaderProgram.createVertexShader(FileLoader.loadContent("shaders/vertex.vert"));
+        shaderProgram.createFragmentShader(FileLoader.loadContent("shaders/fragment.frag"));
         shaderProgram.link();
 
         shaderProgram.createUniform("projectionMatrix");
@@ -45,20 +45,17 @@ public class Renderer {
         );
         shaderProgram.setUniform("projectionMatrix", projectionMatrix);
 
-        Matrix4f viewMatrix = Transformations.getViewMatrix(camera);
+        Matrix4f viewMatrix = camera.getViewMatrix();
 
         shaderProgram.setUniform("textureSampler", 0);
 
         for (GameObject gameObject : gameObjects) {
-            Matrix4f modelViewMatrix = Transformations.getModelViewMatrix(
-                    gameObject,
-                    viewMatrix
-            );
+            Matrix4f modelViewMatrix = gameObject.getModelViewMatrix(viewMatrix);
             shaderProgram.setUniform("modelViewMatrix", modelViewMatrix);
-            shaderProgram.setUniform("color", gameObject.getMesh().getColor());
-            shaderProgram.setUniform("useColor", gameObject.getMesh().hasTexture() ? 0 : 1);
 
-            gameObject.getMesh().render();
+            gameObject.setShaderColor(shaderProgram);
+
+            gameObject.render();
         }
 
         shaderProgram.unbind();
